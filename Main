@@ -368,7 +368,7 @@ ThemeManager:SetLibrary(Library)
 SaveManager:SetLibrary(Library)
 
 ThemeManager:SetFolder('Tempest Hub')
-SaveManager:SetFolder('Tempest Hub/_Ro_Ghoul')
+SaveManager:SetFolder('Tempest Hub/_anime_sword_x')
 
 SaveManager:BuildConfigSection(TabsUI['UI Settings'])
 
@@ -376,7 +376,7 @@ ThemeManager:ApplyToTab(TabsUI['UI Settings'])
 
 SaveManager:LoadAutoloadConfig()
 
-local GameConfigName = '_Ro_Ghoul'
+local GameConfigName = '_anime_sword_x'
 local player = game.Players.LocalPlayer
 SaveManager:Load(player.Name .. GameConfigName)
 spawn(function()
