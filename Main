@@ -102,6 +102,29 @@ function autoroll()
     end
 end
 
+function autocakeboss()
+    while getgenv().autocakeboss == true do
+        local args = {
+            [1] = "Boss",
+            [2] = "Start",
+            [3] = "CakeBoss"
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("Bridge"):FireServer(unpack(args))
+        local args = {
+            [1] = "Attack",
+            [2] = "Click",
+            [3] = {
+                ["Enemy"] = workspace:WaitForChild("Server"):WaitForChild("Enemies"):WaitForChild("Boss"):WaitForChild("Clown Island"):WaitForChild("Cake Mom"),
+                ["Type"] = "Boss"
+            }
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("Bridge"):FireServer(unpack(args))        
+        wait()
+    end
+end
+
 function KillAura()
     while getgenv().KillAura == true do
         local args = {
@@ -158,8 +181,8 @@ function autokillboss()
     end
 end
 
-function autosell()
-    while getgenv().autosell == true do
+function autosellPets()
+    while getgenv().autosellPets == true do
         -- Lista de elementos a serem ignorados
         local blacklist = {
             ["UIGridLayout"] = true,
@@ -195,6 +218,54 @@ function autosell()
         end
         wait(2) -- Ajuste este tempo de espera conforme necessário para evitar solicitações excessivas ao servidor
     end
+end
+
+function autosellSword()
+    while getgenv().autosellSword == true do
+        local blacklist = {
+            ["UIGridLayout"] = true,
+            ["UIStroke"] = true,
+        }
+
+        -- Caminho para a lista de pets
+        local swordListPath = game:GetService("Players").LocalPlayer.PlayerGui.UI.Frames.Inventory.Container.Background.Content.Pages.Swords.List.Frame
+        local children = swordListPath:GetChildren()
+
+        -- Cria uma nova tabela para armazenar os pets a serem vendidos
+        local swordsToSell = {}
+
+        -- Filtra os pets que não estão na lista negra e os adiciona à lista de pets a serem vendidos
+        for _, child in ipairs(children) do
+            if not blacklist[child.Name] then
+                table.insert(swordsToSell, 1, child.Name) -- Adiciona o nome do pet à lista
+            end
+        end
+
+        -- Vende os pets na lista
+        for _, swordname in ipairs(swordsToSell) do
+        local args = {
+            [1] = "Swords",
+            [2] = "Delete",
+            [3] = {
+                [1] = swordname
+            }
+        }
+        
+        game:GetService("ReplicatedStorage"):WaitForChild("Bridge"):FireServer(unpack(args))        
+        wait(2)
+    end
+    wait(2) -- Ajuste este tempo de espera conforme necessário para evitar solicitações excessivas ao servidor
+    end
+end
+
+function walkspeed()
+    local humanoid = game.Players.LocalPlayer.Character.Humanoid
+    humanoid.WalkSpeed = speed
+end
+
+function JumpPower()
+    local humanoid = game.Players.LocalPlayer.Character.Humanoid
+    humanoid.JumpPower = JumpPower    
 end
 
 
@@ -266,9 +337,35 @@ LeftGroupBox:AddToggle('AutobestPet', {
     end
 })
 
-local LeftGroupBox = Tabs.Main:AddLeftGroupbox('Farm')
+LeftGroupBox:AddSlider('Walkspeed', {
+    Text = 'Walkspeed',
+    Default = 0,
+    Min = 20,
+    Max = 200,
+    Rounding = 1,
+    Compact = false,
 
-LeftGroupBox:AddDropdown('Map', {
+    Callback = function(Value)
+        speed = Value
+    end
+})
+
+LeftGroupBox:AddSlider('JumpPower', {
+    Text = 'JumpPower',
+    Default = 0,
+    Min = 20,
+    Max = 200,
+    Rounding = 1,
+    Compact = false,
+
+    Callback = function(Value)
+        JumpPower = Value
+    end
+})
+
+local RightGroupBox = Tabs.Main:AddRightGroupbox('Farm')
+
+RightGroupBox:AddDropdown('Map', {
     Values = ValuesMap,
     Default = "None",
     Multi = false,
@@ -278,7 +375,7 @@ LeftGroupBox:AddDropdown('Map', {
     end
 })
 
-LeftGroupBox:AddDropdown('Enemie', {
+RightGroupBox:AddDropdown('Enemie', {
     Values = ValuesEnemie,
     Default = "None",
     Multi = false,
@@ -288,7 +385,7 @@ LeftGroupBox:AddDropdown('Enemie', {
     end
 })
 
-LeftGroupBox:AddToggle('AutoKill', {
+RightGroupBox:AddToggle('AutoKill', {
     Text = 'Auto Kill + Farm Energy',
     Default = false,
     Callback = function(Value)
@@ -299,7 +396,7 @@ LeftGroupBox:AddToggle('AutoKill', {
     end
 })
 
-LeftGroupBox:AddDropdown('Map', {
+RightGroupBox:AddDropdown('Map', {
     Values = ValuesMap,
     Default = "None",
     Multi = false,
@@ -310,7 +407,7 @@ LeftGroupBox:AddDropdown('Map', {
 })
 
 
-LeftGroupBox:AddDropdown('Boss', {
+RightGroupBox:AddDropdown('Boss', {
     Values = ValuesBoss,
     Default = "None",
     Multi = false,
@@ -320,7 +417,7 @@ LeftGroupBox:AddDropdown('Boss', {
     end
 })
 
-LeftGroupBox:AddToggle('AutoKill', {
+RightGroupBox:AddToggle('AutoKill', {
     Text = 'Auto Kill Boss',
     Default = false,
     Callback = function(Value)
@@ -330,6 +427,19 @@ LeftGroupBox:AddToggle('AutoKill', {
         end
     end
 })
+
+RightGroupBox:AddToggle('AutoCakeBoss', {
+    Text = 'Auto Cake Boss',
+    Default = false,
+    Callback = function(Value)
+        getgenv().autocakeboss = Value
+        if Value then
+            autocakeboss() -- Iniciar o autofarm apenas se estiver ativado
+        end
+    end
+})
+
+local LeftGroupBox = Tabs.Main:AddLeftGroupbox('Summon')
 
 LeftGroupBox:AddDropdown('Map', {
     Values = ValuesMap,
@@ -357,9 +467,20 @@ LeftGroupBox:AddToggle('AutoKill', {
     Text = 'Auto Sell Pets',
     Default = false,
     Callback = function(Value)
-        getgenv().autosell = Value
+        getgenv().autosellPets = Value
         if Value then
-            autosell() -- Iniciar o autofarm apenas se estiver ativado
+            autosellPets() -- Iniciar o autofarm apenas se estiver ativado
+        end
+    end
+})
+
+LeftGroupBox:AddToggle('AutoKill', {
+    Text = 'Auto Sell Swords',
+    Default = false,
+    Callback = function(Value)
+        getgenv().autosellSword = Value
+        if Value then
+            autosellSword() -- Iniciar o autofarm apenas se estiver ativado
         end
     end
 })
