@@ -92,7 +92,7 @@ function autoroll()
             [1] = "Stars",
             [2] = "Roll",
             [3] = {
-                ["Map"] = "Clown Island",
+                ["Map"] = selectedMapRoll,
                 ["Type"] = "Open"
             }
         }
@@ -447,7 +447,7 @@ LeftGroupBox:AddDropdown('Map', {
     Multi = false,
     Text = 'Choose Map',
     Callback = function(value)
-        selectedMap = value
+        selectedMapRoll = value
     end
 })
 
