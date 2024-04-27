@@ -11,7 +11,7 @@ Library:Notify('Welcome to Tempest Hub', 5)
 
 local Window = Library:CreateWindow({
     Title = 'Tempest Hub | Anime Sword',
-    Center = true,
+    Center = false,
     AutoShow = true,
     TabPadding = 8,
     MenuFadeTime = 0.2
@@ -158,6 +158,46 @@ function autokillboss()
     end
 end
 
+function autosell()
+    while getgenv().autosell == true do
+        -- Lista de elementos a serem ignorados
+        local blacklist = {
+            ["UIGridLayout"] = true,
+            ["UIStroke"] = true,
+        }
+
+        -- Caminho para a lista de pets
+        local petsListPath = game:GetService("Players").LocalPlayer.PlayerGui.UI.Frames.Inventory.Container.Background.Content.Pages.Pets.List.Frame
+        local children = petsListPath:GetChildren()
+
+        -- Cria uma nova tabela para armazenar os pets a serem vendidos
+        local petsToSell = {}
+
+        -- Filtra os pets que não estão na lista negra e os adiciona à lista de pets a serem vendidos
+        for _, child in ipairs(children) do
+            if not blacklist[child.Name] then
+                table.insert(petsToSell, 1, child.Name) -- Adiciona o nome do pet à lista
+            end
+        end
+
+        -- Vende os pets na lista
+        for _, petName in ipairs(petsToSell) do
+            local args = {
+                [1] = "Pets",
+                [2] = "Delete",
+                [3] = {
+                    [1] = petName
+                }
+            }
+            -- Chama o servidor com os argumentos para vender o pet
+            game:GetService("ReplicatedStorage"):WaitForChild("Bridge"):FireServer(unpack(args))
+            wait(2)
+        end
+        wait(2) -- Ajuste este tempo de espera conforme necessário para evitar solicitações excessivas ao servidor
+    end
+end
+
+
 local ValuesEnemie = {}
 local ValuesMap = {}
 local ValuesBoss = {}
@@ -196,9 +236,6 @@ if map2 then
 else
     warn("Boss object not found in ReplicatedStorage")
 end
-
-
-
 
 
 local Tabs = {
@@ -277,7 +314,7 @@ LeftGroupBox:AddDropdown('Boss', {
     Values = ValuesBoss,
     Default = "None",
     Multi = false,
-    Text = 'Choose Mob',
+    Text = 'Choose Boss',
     Callback = function(value)
         selectedBoss = value
     end
@@ -311,6 +348,18 @@ LeftGroupBox:AddToggle('AutoRoll', {
         getgenv().autoroll = Value
         if Value then
             autoroll() -- Iniciar o autofarm apenas se estiver ativado
+        end
+    end
+})
+
+
+LeftGroupBox:AddToggle('AutoKill', {
+    Text = 'Auto Sell Pets',
+    Default = false,
+    Callback = function(Value)
+        getgenv().autosell = Value
+        if Value then
+            autosell() -- Iniciar o autofarm apenas se estiver ativado
         end
     end
 })
